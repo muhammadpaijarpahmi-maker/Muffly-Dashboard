@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Muffly — Security</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"></script>
+<style>
+  body { margin:0; background:#020617; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+  canvas { display:block; border-radius:40px; box-shadow:0 0 60px rgba(139,92,246,0.15); }
+</style>
+</head>
+<body>
+<script>
+function setup() { createCanvas(400, 780); pixelDensity(2); }
+function draw() {
+  background(15, 23, 42);
+  framePhone();
+  textAlign(LEFT, TOP); noStroke();
+  drawGradientText("Muffly", 24, 36, "#8b5cf6", "#06b6d4");
+  fill(148, 163, 184); textSize(10); text("SECURITY & SAFETY", 24, 66);
+  
+  // ── Circuit Breaker ──
+  fill(30, 41, 59); noStroke(); rect(12, 80, 376, 50, 10);
+  fill(52, 211, 153); textAlign(LEFT, CENTER); textSize(11);
+  text("🛡️ Circuit Breaker", 24, 100);
+  fill(148, 163, 184); textSize(9); text("Status: OFF  •  Loss streak: 0  •  Max: 2", 24, 118);
+  
+  fill(52, 211, 153, 30); stroke(52, 211, 153, 80); strokeWeight(1);
+  rect(290, 94, 80, 22, 8);
+  fill(52, 211, 153); noStroke(); textAlign(CENTER, CENTER); textSize(10); text("✅ HEALTHY", 330, 105);
+  
+  // ── MEV Protection ──
+  fill(30, 41, 59); noStroke(); rect(12, 140, 376, 50, 10);
+  fill(6, 182, 212); textAlign(LEFT, CENTER); textSize(11);
+  text("⛽ Jito Bundle / MEV Protection", 24, 160);
+  fill(148, 163, 184); textSize(9);
+  text("Status: ON  •  Tip: 0.001 SOL  •  Anti-sandwich active", 24, 178);
+  
+  fill(52, 211, 153, 30); stroke(52, 211, 153, 80); strokeWeight(1);
+  rect(290, 154, 80, 22, 8);
+  fill(52, 211, 153); noStroke(); textAlign(CENTER, CENTER); textSize(10); text("✅ ACTIVE", 330, 165);
+  
+  // ── Slippage ──
+  fill(30, 41, 59); noStroke(); rect(12, 200, 376, 50, 10);
+  fill(251, 191, 36); textAlign(LEFT, CENTER); textSize(11);
+  text("📉 Slippage Protection", 24, 220);
+  fill(148, 163, 184); textSize(9);
+  text("Max: 2.0% deploy  •  3.0% close  •  Gating volatile pools", 24, 238);
+  
+  fill(52, 211, 153, 30); stroke(52, 211, 153, 80); strokeWeight(1);
+  rect(290, 214, 80, 22, 8);
+  fill(52, 211, 153); noStroke(); textAlign(CENTER, CENTER); textSize(10); text("✅ ACTIVE", 330, 225);
+  
+  // ── State Backup ──
+  fill(30, 41, 59); noStroke(); rect(12, 260, 376, 50, 10);
+  fill(139, 92, 246); textAlign(LEFT, CENTER); textSize(11);
+  text("💾 State Backup", 24, 280);
+  fill(148, 163, 184); textSize(9);
+  text("Every 6h  •  30 backups kept  •  Auto-restore on error", 24, 298);
+  
+  fill(52, 211, 153, 30); stroke(52, 211, 153, 80); strokeWeight(1);
+  rect(290, 274, 80, 22, 8);
+  fill(52, 211, 153); noStroke(); textAlign(CENTER, CENTER); textSize(10); text("✅ ACTIVE", 330, 285);
+
+  // ── Token Audit ──
+  fill(30, 41, 59); noStroke(); rect(12, 320, 376, 80, 10);
+  fill(148, 163, 184); textAlign(LEFT, TOP); textSize(10);
+  text("TOKEN AUDIT (last screened)", 24, 330);
+  
+  let aud = [
+    { label: "🧬 Mint authority", status: "✅ Disabled" },
+    { label: "❄️ Freeze authority", status: "✅ Disabled" },
+    { label: "🏦 Top 10 holders", status: "✅ 42% (limit 50%)" },
+    { label: "🤖 Bot holders", status: "✅ 12% (limit 20%)" },
+    { label: "👤 Dev balance", status: "✅ 2.1% (safe)" },
+  ];
+  for (let i = 0; i < aud.length; i++) {
+    fill(100, 116, 139); textSize(8); textAlign(LEFT, TOP);
+    text(aud[i].label, 24, 348 + i * 10);
+    fill(52, 211, 153); textAlign(RIGHT, TOP);
+    text(aud[i].status, 340, 348 + i * 10);
+  }
+  
+  // ── Screening Filter Status ──
+  fill(30, 41, 59); noStroke(); rect(12, 410, 376, 100, 10);
+  fill(148, 163, 184); textSize(10); text("SCREENING FILTERS (9 layers)", 24, 420);
+  
+  let filters = [
+    { name: "MCAP", val: "$250K-$5M", pass: true },
+    { name: "Holders", val: "800+", pass: true },
+    { name: "Organic", val: "70+", pass: true },
+    { name: "Volume", val: "$2K+", pass: true },
+    { name: "BinStep", val: "80-100", pass: true },
+    { name: "Bot%", val: "<20%", pass: true },
+    { name: "Top10%", val: "<50%", pass: true },
+    { name: "Fees", val: ">50 SOL", pass: true },
+    { name: "Age", val: ">2h", pass: true },
+  ];
+  for (let i = 0; i < filters.length; i++) {
+    let f = filters[i], x = 24 + (i % 3) * 120, y = 436 + floor(i / 3) * 24;
+    fill(f.pass ? color(52, 211, 153, 30) : color(251, 113, 133, 30));
+    noStroke(); rect(x, y, 110, 18, 6);
+    fill(f.pass ? color(52, 211, 153) : color(251, 113, 133));
+    textAlign(LEFT, CENTER); textSize(8);
+    text((f.pass ? "✅" : "❌") + " " + f.name + " " + f.val, x + 8, y + 9);
+  }
+  
+  // ── GMGN KOL ──
+  fill(30, 41, 59); noStroke(); rect(12, 520, 376, 50, 10);
+  fill(251, 146, 60); textAlign(LEFT, CENTER); textSize(11);
+  text("🐋 GMGN KOL Tracking", 24, 540);
+  fill(148, 163, 184); textSize(9);
+  text("3 KOLs tracked  •  Min PnL: $1K  •  Auto-follow deploy", 24, 558);
+  fill(52, 211, 153, 30); stroke(52, 211, 153, 80);
+  rect(290, 534, 80, 22, 8);
+  fill(52, 211, 153); noStroke(); textAlign(CENTER, CENTER); textSize(10); text("✅ ACTIVE", 330, 545);
+  
+  // ── Exit Logic ──
+  fill(30, 41, 59); noStroke(); rect(12, 580, 376, 70, 10);
+  fill(148, 163, 184); textSize(10); text("EXIT LOGIC (6 layers)", 24, 590);
+  
+  let exits = [
+    "1️⃣ Fix SL -8%      2️⃣ Dynamic SL (ATR×2, -5%/−12%)",
+    "3️⃣ RSI (65/35)    4️⃣ Bollinger Bands (20,2.0)",
+    "5️⃣ Trailing TP (2%/1%)  6️⃣ Take Profit +8%",
+  ];
+  for (let i = 0; i < exits.length; i++) {
+    fill(100, 116, 139); textSize(8); text(exits[i], 24, 604 + i * 14);
+  }
+  
+  drawNav(3);
+  fill(51, 65, 85); textSize(7); textAlign(CENTER, TOP);
+  text("Muffly v1.0 • Security & Safety Dashboard", 200, 732);
+}
+
+function drawNav(active) {
+  let navY = 700;
+  stroke(30, 41, 59); strokeWeight(1); line(12, navY, 388, navY);
+  let icons = ["📊","💼","📈","🛡️","⚙️"], labels = ["Dashboard","Positions","Analytics","Security","Config"];
+  for (let i = 0; i < 5; i++) {
+    let x = 40 + i * 72;
+    noStroke();
+    if (i === active) { fill(6, 182, 212); textSize(18); }
+    else { fill(100, 116, 139); textSize(16); }
+    textAlign(CENTER, TOP); text(icons[i], x, navY + 10);
+    fill(i === active ? color(6, 182, 212) : color(100, 116, 139));
+    textSize(9); text(labels[i], x, navY + 34);
+  }
+}
+
+function drawGradientText(txt, x, y, c1, c2) {
+  let col1 = color(c1), col2 = color(c2);
+  for (let i = 0; i < txt.length; i++) {
+    fill(lerpColor(col1, col2, i / (txt.length - 1)));
+    text(txt[i], x + i * 12, y);
+  }
+}
+
+function framePhone() {
+  noFill(); stroke(30, 41, 59); strokeWeight(2); rect(0, 0, 400, 780, 40);
+  fill(2, 6, 23); noStroke(); rect(140, 0, 120, 24, [0,0,16,16]);
+  fill(100, 116, 139); textSize(10); textAlign(LEFT, TOP); text("9:41", 24, 8);
+  textAlign(RIGHT, TOP); text("🔋 92%", 376, 8);
+}
+</script>
+</body>
+</html>

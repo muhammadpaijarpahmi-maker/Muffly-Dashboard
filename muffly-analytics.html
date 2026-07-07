@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Muffly — Analytics</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"></script>
+<style>
+  body { margin:0; background:#020617; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+  canvas { display:block; border-radius:40px; box-shadow:0 0 60px rgba(139,92,246,0.15); }
+</style>
+</head>
+<body>
+<script>
+let chartOffset = 0;
+function setup() { createCanvas(400, 780); pixelDensity(2); }
+function draw() {
+  background(15, 23, 42);
+  framePhone();
+  
+  // Header
+  textAlign(LEFT, TOP); noStroke();
+  drawGradientText("Muffly", 24, 36, "#8b5cf6", "#06b6d4");
+  fill(148, 163, 184); textSize(10); text("ANALYTICS & PERFORMANCE", 24, 66);
+  
+  // ── Summary Cards ──
+  let cards = [
+    { val: "71%", label: "Win Rate", color: "#22d3ee", sub: "12/17 closed" },
+    { val: "+14.9%", label: "Avg Return", color: "#34d399", sub: "per position" },
+    { val: "-4.2%", label: "Avg Loss", color: "#fb7185", sub: "per position" },
+    { val: "34", label: "Total Trades", color: "#a78bfa", sub: "17 closed + 17 open" },
+  ];
+  for (let i = 0; i < 4; i++) {
+    let x = 12 + i * 96;
+    fill(30, 41, 59); noStroke(); rect(x, 80, 90, 54, 10);
+    fill(cards[i].color); textAlign(CENTER, TOP); textSize(18); text(cards[i].val, x + 45, 88);
+    fill(100, 116, 139); textSize(8); text(cards[i].label, x + 45, 110);
+    textSize(7); text(cards[i].sub, x + 45, 122);
+  }
+  
+  // ── PnL Chart ──
+  fill(30, 41, 59); noStroke(); rect(12, 144, 376, 120, 10);
+  fill(148, 163, 184); textSize(10); text("CUMULATIVE PNL — ALL TIME", 24, 154);
+  
+  chartOffset += 0.005;
+  let pts = [];
+  for (let i = 0; i < 50; i++) {
+    let x = 24 + i * 7.2;
+    let n = noise(i * 0.08 + chartOffset);
+    let y = 220 - n * 40;
+    pts.push({x, y});
+  }
+  
+  stroke(139, 92, 246); strokeWeight(2); noFill(); beginShape();
+  for (let p of pts) vertex(p.x, p.y); endShape();
+  noStroke(); fill(139, 92, 246, 30); beginShape();
+  vertex(pts[0].x, 264); for (let p of pts) vertex(p.x, p.y);
+  vertex(pts[pts.length-1].x, 264); endShape(CLOSE);
+  
+  fill(52, 211, 153); textAlign(RIGHT, TOP); textSize(14);
+  text("+$245.30", 372, 150);
+  fill(100, 116, 139); textSize(8); text("Total profit all time", 372, 168);
+
+  // ── Win/Loss Pie ──
+  fill(30, 41, 59); noStroke(); rect(12, 274, 180, 70, 10);
+  fill(148, 163, 184); textSize(10); text("WIN / LOSS", 24, 284);
+  
+  let cx = 60, cy = 316, r = 28;
+  let winAngle = 255, lossAngle = 360 - 255;
+  noStroke();
+  fill(52, 211, 153); arc(cx, cy, r*2, r*2, radians(-90), radians(-90 + winAngle));
+  fill(251, 113, 133); arc(cx, cy, r*2, r*2, radians(-90 + winAngle), radians(270));
+  
+  fill(226, 232, 240); textAlign(LEFT, CENTER); textSize(12);
+  text("12 Wins (71%)", 110, 300);
+  fill(52, 211, 153); textSize(9); text("🟢 +$320.50", 110, 316);
+  fill(251, 113, 133); text("🔴 -$75.20", 110, 330);
+  
+  // ── Fee Analytics ──
+  fill(30, 41, 59); noStroke(); rect(200, 274, 188, 70, 10);
+  fill(148, 163, 184); textSize(10); text("FEE ANALYTICS", 210, 284);
+  fill(251, 191, 36); textAlign(LEFT, TOP); textSize(20); text("$89.20", 210, 298);
+  fill(100, 116, 139); textSize(8); text("Total fees earned all time", 210, 322);
+  text("Fee/TVL avg: 2.1%", 210, 334);
+  
+  // ── Strategy Performance ──
+  fill(30, 41, 59); noStroke(); rect(12, 354, 376, 60, 10);
+  fill(148, 163, 184); textSize(10); text("STRATEGY PERFORMANCE", 24, 364);
+  
+  let strats = [
+    { name: "bid_ask (active)", trades: 12, win: 9, profit: "+$189", bar: 70, best: true },
+    { name: "spot", trades: 3, win: 2, profit: "+$42", bar: 20 },
+    { name: "curve", trades: 2, win: 1, profit: "+$14", bar: 10 },
+  ];
+  for (let i = 0; i < strats.length; i++) {
+    let s = strats[i], y = 376 + i * 12;
+    fill(s.best ? color(139, 92, 246) : color(100, 116, 139));
+    textAlign(LEFT, TOP); textSize(8); text(s.name, 24, y);
+    fill(51, 65, 85); rect(140, y + 2, 160, 6, 3);
+    fill(s.best ? color(139, 92, 246) : color(52, 211, 153));
+    rect(140, y + 2, s.bar * 1.6, 6, 3);
+    textAlign(RIGHT, TOP);
+    fill(s.best ? color(139, 92, 246) : color(100, 116, 139));
+    textSize(8); text(s.profit, 372, y);
+  }
+  
+  // ── Best Pool ──
+  fill(30, 41, 59); noStroke(); rect(12, 424, 376, 40, 10);
+  fill(52, 211, 153); textAlign(LEFT, CENTER); textSize(12);
+  text("🏆 Best Pool: BONK/SOL", 24, 444);
+  fill(148, 163, 184); textSize(9);
+  text("3 deploys  •  100% win rate  •  +$89.50 total profit", 24, 458);
+  
+  // ── Daily PnL Table ──
+  fill(30, 41, 59); noStroke(); rect(12, 474, 376, 90, 10);
+  fill(148, 163, 184); textSize(10); text("LAST 7 DAYS", 24, 484);
+  
+  let days = [
+    { day: "Mon", pnl: "+$42", bars: 20 }, { day: "Tue", pnl: "+$18", bars: 12 },
+    { day: "Wed", pnl: "-$8", bars: 5 }, { day: "Thu", pnl: "+$35", bars: 18 },
+    { day: "Fri", pnl: "+$52", bars: 25 }, { day: "Sat", pnl: "+$12", bars: 8 },
+    { day: "Sun", pnl: "+$94", bars: 30 },
+  ];
+  for (let i = 0; i < 7; i++) {
+    let d = days[i], x = 28 + i * 50;
+    let isPos = d.pnl.startsWith("+");
+    fill(51, 65, 85); rect(x, 518 - d.bars * 1.5, 30, d.bars * 1.5, [3,3,0,0]);
+    fill(isPos ? color(52, 211, 153) : color(251, 113, 133));
+    rect(x, 518 - d.bars * 1.5, 30, d.bars * 1.5, [3,3,0,0]);
+    textAlign(CENTER, TOP); fill(100, 116, 139); textSize(7); text(d.day, x + 15, 524);
+    fill(isPos ? color(52, 211, 153) : color(251, 113, 133));
+    textSize(7); text(d.pnl, x + 15, 535);
+  }
+  
+  drawNav(2);
+  fill(51, 65, 85); textSize(7); textAlign(CENTER, TOP);
+  text("Muffly v1.0 • Analytics & Performance", 200, 732);
+}
+
+function drawNav(active) {
+  let navY = 700;
+  stroke(30, 41, 59); strokeWeight(1); line(12, navY, 388, navY);
+  let icons = ["📊","💼","📈","🛡️","⚙️"], labels = ["Dashboard","Positions","Analytics","Security","Config"];
+  for (let i = 0; i < 5; i++) {
+    let x = 40 + i * 72;
+    noStroke();
+    if (i === active) { fill(6, 182, 212); textSize(18); }
+    else { fill(100, 116, 139); textSize(16); }
+    textAlign(CENTER, TOP); text(icons[i], x, navY + 10);
+    fill(i === active ? color(6, 182, 212) : color(100, 116, 139));
+    textSize(9); text(labels[i], x, navY + 34);
+  }
+}
+
+function drawGradientText(txt, x, y, c1, c2) {
+  let col1 = color(c1), col2 = color(c2);
+  for (let i = 0; i < txt.length; i++) {
+    fill(lerpColor(col1, col2, i / (txt.length - 1)));
+    text(txt[i], x + i * 12, y);
+  }
+}
+
+function framePhone() {
+  noFill(); stroke(30, 41, 59); strokeWeight(2); rect(0, 0, 400, 780, 40);
+  fill(2, 6, 23); noStroke(); rect(140, 0, 120, 24, [0,0,16,16]);
+  fill(100, 116, 139); textSize(10); textAlign(LEFT, TOP); text("9:41", 24, 8);
+  textAlign(RIGHT, TOP); text("🔋 92%", 376, 8);
+}
+</script>
+</body>
+</html>

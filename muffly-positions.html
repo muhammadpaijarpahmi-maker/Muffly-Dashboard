@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Muffly — Positions</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"></script>
+<style>
+  body { margin:0; background:#020617; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+  canvas { display:block; border-radius:40px; box-shadow:0 0 60px rgba(139,92,246,0.15); }
+</style>
+</head>
+<body>
+<script>
+function setup() { createCanvas(400, 780); pixelDensity(2); }
+function draw() {
+  background(15, 23, 42);
+  framePhone();
+  
+  // Header
+  textAlign(LEFT, TOP); noStroke();
+  drawGradientText("Muffly", 24, 36, "#8b5cf6", "#06b6d4");
+  
+  // Title
+  fill(148, 163, 184); textSize(10); text("POSITIONS MANAGEMENT", 24, 66);
+  
+  // ── Open Positions ──
+  let py = 90;
+  let positions = [
+    { name: "BONK / SOL", address: "0x7a3f...c9d2", bins: "40 | Step 100", range: "$0.0012 - $0.0018", status: "IN RANGE", pnl: "+12.3%", pnlUsd: "+$41.50", fees: "$8.20", sol: "1.05", profit: true, inRange: true },
+    { name: "WIF / SOL", address: "0x4e21...b7f3", bins: "40 | Step 100", range: "$1.20 - $1.80", status: "IN RANGE", pnl: "+5.6%", pnlUsd: "+$18.20", fees: "$5.40", sol: "1.02", profit: true, inRange: true },
+    { name: "POPCAT / SOL", address: "0x9f8c...2d45", bins: "45 | Step 100", range: "$0.45 - $0.68", status: "⚠️ OOR", pnl: "-3.2%", pnlUsd: "-$8.40", fees: "$2.10", sol: "0.97", profit: false, inRange: false },
+  ];
+  
+  for (let i = 0; i < positions.length; i++) {
+    let p = positions[i];
+    let y = py + i * 120;
+    
+    // Card
+    fill(30, 41, 59); noStroke(); rect(12, y, 376, 112, 12);
+    
+    // Header card
+    fill(p.profit ? color(52, 211, 153, 30) : color(251, 113, 133, 30));
+    rect(12, y, 376, 28, [12,12,0,0]);
+    
+    textAlign(LEFT, CENTER); textSize(12);
+    fill(p.profit ? color(52, 211, 153) : color(251, 113, 133));
+    text(p.profit ? "🟢" : "🔴", 20, y + 14);
+    fill(226, 232, 240); text(p.name, 40, y + 14);
+    
+    // Status badge
+    if (p.inRange) {
+      fill(52, 211, 153, 30); stroke(52, 211, 153, 80); strokeWeight(1);
+      rect(256, y + 4, 64, 20, 8);
+      fill(52, 211, 153); noStroke(); textSize(9); textAlign(CENTER, CENTER);
+      text("IN RANGE", 288, y + 14);
+    } else {
+      fill(251, 113, 133, 30); stroke(251, 113, 133, 80); strokeWeight(1);
+      rect(256, y + 4, 64, 20, 8);
+      fill(251, 113, 133); noStroke(); textSize(9); textAlign(CENTER, CENTER);
+      text("⚠️ OOR", 288, y + 14);
+    }
+    
+    // Body
+    textAlign(LEFT, CENTER); fill(100, 116, 139); textSize(9);
+    text("Address: " + p.address, 24, y + 44);
+    text("Range: " + p.range, 24, y + 58);
+    text("Bins: " + p.bins, 200, y + 44);
+    text("Deployed: ◎" + p.sol, 200, y + 58);
+    
+    // PnL large
+    textAlign(RIGHT, CENTER);
+    fill(p.profit ? color(52, 211, 153) : color(251, 113, 133));
+    textSize(18); text(p.pnl, 372, y + 48);
+    fill(100, 116, 139); textSize(9); text(p.pnlUsd, 372, y + 66);
+    
+    // Fee bar
+    fill(51, 65, 85); rect(24, y + 80, 160, 6, 3);
+    fill(251, 191, 36); rect(24, y + 80, 60, 6, 3);
+    textAlign(LEFT, CENTER); fill(148, 163, 184); textSize(8);
+    text("💰 Fees: " + p.fees, 190, y + 83);
+    
+    // Close button
+    noStroke(); fill(239, 68, 68, 40); rect(300, y + 82, 60, 20, 6);
+    fill(239, 68, 68); textAlign(CENTER, CENTER); textSize(10); text("Close", 330, y + 92);
+    
+    // Sep
+    stroke(30, 41, 59); strokeWeight(1); line(12, y + 112, 388, y + 112);
+  }
+  
+  // ── Closed positions ──
+  let cy = py + 3 * 120 + 8;
+  fill(148, 163, 184); textSize(10); textAlign(LEFT, TOP); noStroke();
+  text("CLOSED HISTORY (last 3)", 24, cy);
+  
+  let closed = [
+    { name: "DOGE/SOL", pnl: "+8.2%", reason: "Trailing TP", time: "2h ago", sol: "1.0" },
+    { name: "PEPE/SOL", pnl: "-5.1%", reason: "Dynamic SL", time: "8h ago", sol: "1.0" },
+    { name: "FLOKI/SOL", pnl: "+15.3%", reason: "RSI overbought", time: "1d ago", sol: "1.0" },
+  ];
+  
+  for (let i = 0; i < closed.length; i++) {
+    let c = closed[i], y = cy + 18 + i * 38;
+    fill(30, 41, 59); noStroke(); rect(12, y, 376, 32, 8);
+    
+    let profit = c.pnl.startsWith("+");
+    fill(profit ? color(52, 211, 153) : color(251, 113, 133));
+    textAlign(LEFT, CENTER); textSize(12);
+    text(profit ? "🟢" : "🔴", 24, y + 16);
+    
+    fill(226, 232, 240); textSize(12); text(c.name, 48, y + 16);
+    fill(100, 116, 139); textSize(9); text(c.reason, 140, y + 16);
+    
+    textAlign(RIGHT, CENTER);
+    fill(profit ? color(52, 211, 153) : color(251, 113, 133));
+    textSize(13); text(c.pnl, 350, y + 16);
+    fill(71, 85, 105); textSize(8); text(c.time, 300, y + 16);
+  }
+  
+  // Nav
+  drawNav(1);
+  fill(51, 65, 85); textSize(7); textAlign(CENTER, TOP);
+  text("Muffly v1.0 • Positions Management", 200, 732);
+}
+
+function drawNav(active) {
+  let navY = 700;
+  stroke(30, 41, 59); strokeWeight(1); line(12, navY, 388, navY);
+  let icons = ["📊","💼","📈","🛡️","⚙️"], labels = ["Dashboard","Positions","Analytics","Security","Config"];
+  for (let i = 0; i < 5; i++) {
+    let x = 40 + i * 72;
+    noStroke();
+    if (i === active) { fill(6, 182, 212); textSize(18); }
+    else { fill(100, 116, 139); textSize(16); }
+    textAlign(CENTER, TOP); text(icons[i], x, navY + 10);
+    fill(i === active ? color(6, 182, 212) : color(100, 116, 139));
+    textSize(9); text(labels[i], x, navY + 34);
+  }
+}
+
+function drawGradientText(txt, x, y, c1, c2) {
+  let col1 = color(c1), col2 = color(c2);
+  for (let i = 0; i < txt.length; i++) {
+    fill(lerpColor(col1, col2, i / (txt.length - 1)));
+    text(txt[i], x + i * 12, y);
+  }
+}
+
+function framePhone() {
+  noFill(); stroke(30, 41, 59); strokeWeight(2); rect(0, 0, 400, 780, 40);
+  fill(2, 6, 23); noStroke(); rect(140, 0, 120, 24, [0,0,16,16]);
+  fill(100, 116, 139); textSize(10); textAlign(LEFT, TOP); text("9:41", 24, 8);
+  textAlign(RIGHT, TOP); text("🔋 92%", 376, 8);
+}
+</script>
+</body>
+</html>

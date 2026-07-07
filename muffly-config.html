@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Muffly — Config</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"></script>
+<style>
+  body { margin:0; background:#020617; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+  canvas { display:block; border-radius:40px; box-shadow:0 0 60px rgba(139,92,246,0.15); }
+</style>
+</head>
+<body>
+<script>
+function setup() { createCanvas(400, 780); pixelDensity(2); }
+function draw() {
+  background(15, 23, 42);
+  framePhone();
+  textAlign(LEFT, TOP); noStroke();
+  drawGradientText("Muffly", 24, 36, "#8b5cf6", "#06b6d4");
+  fill(148, 163, 184); textSize(10); text("CONFIGURATION", 24, 66);
+  
+  // ── Position Sizing ──
+  fill(30, 41, 59); noStroke(); rect(12, 80, 376, 50, 10);
+  fill(148, 163, 184); textSize(10); text("💰 POSITION SIZING", 24, 90);
+  fill(100, 116, 139); textSize(8);
+  text("Deploy: 1.0 SOL  •  Max: 3 pos  •  Size: 25% wallet  •  Reserve: 0.2 SOL", 24, 108);
+  text("Min SOL to open: 1.1  •  Max deploy: 5 SOL", 24, 120);
+  
+  // ── Bin & Range ──
+  fill(30, 41, 59); noStroke(); rect(12, 140, 376, 50, 10);
+  fill(148, 163, 184); textSize(10); text("🎯 BIN & RANGE", 24, 150);
+  fill(100, 116, 139); textSize(8);
+  text("Strategy: bid_ask  •  Bins: 30-45 (def 40)  •  Step: 80-100", 24, 168);
+  text("Range lebar: 4.000 unit  •  Fee optimal 2.5× dari default", 24, 180);
+  
+  // ── Exit Logic ──
+  fill(30, 41, 59); noStroke(); rect(12, 200, 376, 70, 10);
+  fill(148, 163, 184); textSize(10); text("🛡️ EXIT LOGIC (6 layers)", 24, 210);
+  fill(100, 116, 139); textSize(8);
+  text("Fix SL: -8%  |  Dynamic SL: ATR×2.0 ( -5% s.d -12% )", 24, 228);
+  text("RSI: Overbought 65 / Oversold 35  |  BB: Period 20, Std 2.0", 24, 240);
+  text("Trailing: Trigger +2%, Drop 1%  |  TP: +8%", 24, 252);
+  
+  // ── Screening ──
+  fill(30, 41, 59); noStroke(); rect(12, 280, 376, 80, 10);
+  fill(148, 163, 184); textSize(10); text("🔍 SCREENING FILTERS (9 layers)", 24, 290);
+  fill(100, 116, 139); textSize(8);
+  text("MCAP: $250K-$5M  |  Holders: 800+  |  Organic: 70+", 24, 308);
+  text("Volume: $2K+  |  BinStep: 80-100  |  Top10: <50%", 24, 320);
+  text("Bot%: <20%  |  Fees: >50 SOL  |  Age: >2h", 24, 332);
+  text("Quote token: SOL & USDC  |  Timeframe: 5m  |  DiscardPvp: true", 24, 344);
+  
+  // ── Keamanan ──
+  fill(30, 41, 59); noStroke(); rect(12, 370, 376, 65, 10);
+  fill(148, 163, 184); textSize(10); text("🔐 KEAMANAN", 24, 380);
+  fill(100, 116, 139); textSize(8);
+  text("Circuit Breaker: 2 loss → stop 3 jam (Telegram notif ✅)", 24, 398);
+  text("Slippage: 2% deploy / 3% close", 24, 410);
+  text("MEV: Jito Bundle ON  |  Backup: tiap 6h  |  Gas: dinamis", 24, 422);
+  
+  // ── Auto ──
+  fill(30, 41, 59); noStroke(); rect(12, 445, 376, 50, 10);
+  fill(148, 163, 184); textSize(10); text("🔄 AUTO FEATURES", 24, 455);
+  fill(100, 116, 139); textSize(8);
+  text("Auto-Compound: ✅ 5×/hari, min $0.5", 24, 473);
+  text("Copy Trade KOL: ✅ Min PnL $1K, auto exit on sell", 24, 485);
+  text("Portfolio Dashboard: ✅ Daily report 8:00 UTC", 24, 497);
+  
+  // ── Chart ──
+  fill(30, 41, 59); noStroke(); rect(12, 505, 376, 35, 10);
+  fill(148, 163, 184); textSize(10); text("📊 CHART", 24, 515);
+  fill(100, 116, 139); textSize(8);
+  text("Tokleo Chart: ✅ 7 indikator  •  DataSource: Birdeye • Top 3 full chart", 24, 530);
+  
+  // ── LLM ──
+  fill(30, 41, 59); noStroke(); rect(12, 550, 376, 30, 10);
+  fill(148, 163, 184); textSize(10); text("🧠 LLM", 24, 560);
+  fill(100, 116, 139); textSize(8);
+  text("Model: minimax/m2.7  •  Temp: 0.373  •  MaxTokens: 4096  •  MaxSteps: 20", 24, 575);
+  
+  // ── Schedule ──
+  fill(30, 41, 59); noStroke(); rect(12, 590, 376, 30, 10);
+  fill(148, 163, 184); textSize(10); text("⏰ SCHEDULE", 24, 600);
+  fill(100, 116, 139); textSize(8);
+  text("Management: 10m  •  Screening: 30m  •  Health: 60m  •  Dashboard: 8:00 UTC", 24, 615);
+  
+  // ── Network ──
+  fill(30, 41, 59); noStroke(); rect(12, 630, 376, 30, 10);
+  fill(148, 163, 184); textSize(10); text("🌐 NETWORK", 24, 640);
+  fill(100, 116, 139); textSize(8);
+  text("RPC: Helius  •  Jito: Active  •  Birdeye: Active  •  GMGN: Active", 24, 655);
+  
+  drawNav(4);
+  fill(51, 65, 85); textSize(7); textAlign(CENTER, TOP);
+  text("Muffly v1.0 • Configuration Panel", 200, 732);
+}
+
+function drawNav(active) {
+  let navY = 700;
+  stroke(30, 41, 59); strokeWeight(1); line(12, navY, 388, navY);
+  let icons = ["📊","💼","📈","🛡️","⚙️"], labels = ["Dashboard","Positions","Analytics","Security","Config"];
+  for (let i = 0; i < 5; i++) {
+    let x = 40 + i * 72;
+    noStroke();
+    if (i === active) { fill(6, 182, 212); textSize(18); }
+    else { fill(100, 116, 139); textSize(16); }
+    textAlign(CENTER, TOP); text(icons[i], x, navY + 10);
+    fill(i === active ? color(6, 182, 212) : color(100, 116, 139));
+    textSize(9); text(labels[i], x, navY + 34);
+  }
+}
+
+function drawGradientText(txt, x, y, c1, c2) {
+  let col1 = color(c1), col2 = color(c2);
+  for (let i = 0; i < txt.length; i++) {
+    fill(lerpColor(col1, col2, i / (txt.length - 1)));
+    text(txt[i], x + i * 12, y);
+  }
+}
+
+function framePhone() {
+  noFill(); stroke(30, 41, 59); strokeWeight(2); rect(0, 0, 400, 780, 40);
+  fill(2, 6, 23); noStroke(); rect(140, 0, 120, 24, [0,0,16,16]);
+  fill(100, 116, 139); textSize(10); textAlign(LEFT, TOP); text("9:41", 24, 8);
+  textAlign(RIGHT, TOP); text("🔋 92%", 376, 8);
+}
+</script>
+</body>
+</html>

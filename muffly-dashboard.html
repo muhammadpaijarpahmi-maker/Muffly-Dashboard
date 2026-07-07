@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Muffly Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"></script>
+<style>
+  body { margin:0; background:#020617; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+  canvas { display:block; border-radius:40px; box-shadow:0 0 60px rgba(139,92,246,0.15); }
+</style>
+</head>
+<body>
+<script>
+function setup() {
+  createCanvas(400, 780);
+  pixelDensity(2);
+}
+
+function draw() {
+  background(15, 23, 42);
+
+  // ── Phone Frame ──
+  noFill();
+  stroke(30, 41, 59);
+  strokeWeight(2);
+  rect(0, 0, 400, 780, 40);
+  
+  // Notch
+  fill(2, 6, 23);
+  noStroke();
+  rect(140, 0, 120, 24, [0,0,16,16]);
+  
+  // Status bar
+  fill(100, 116, 139);
+  textSize(10);
+  textFont('Arial');
+  textAlign(LEFT, TOP);
+  text("9:41", 24, 8);
+  textAlign(RIGHT, TOP);
+  text("🔋 92%", 376, 8);
+
+  // ── Header MUFFLY ──
+  noStroke();
+  textAlign(LEFT, TOP);
+  textSize(22);
+  drawGradientText("Muffly", 24, 36, "#8b5cf6", "#06b6d4");
+  
+  // Live badge
+  fill(6, 182, 212, 30);
+  stroke(6, 182, 212, 80);
+  strokeWeight(1);
+  rect(290, 34, 90, 24, 12);
+  fill(6, 182, 212);
+  noStroke();
+  let pulse = sin(frameCount * 0.1) * 0.5 + 0.5;
+  fill(6, 182, 212, 100 + 155 * pulse);
+  circle(306, 46, 6);
+  fill(6, 182, 212);
+  textSize(9);
+  textAlign(LEFT, CENTER);
+  text("LIVE", 318, 46);
+
+  // ── Stats Grid (5 kartu) ──
+  let stats = [
+    { val: "$1,892", label: "Total Value", color: "#34d399" },
+    { val: "+$245", label: "PnL (30d)", color: "#34d399" },
+    { val: "71%", label: "Win Rate", color: "#22d3ee" },
+    { val: "$89", label: "Fees Earned", color: "#fbbf24" },
+    { val: "15", label: "Compound×", color: "#a78bfa" },
+  ];
+  
+  for (let i = 0; i < 5; i++) {
+    let x = 12 + i * 77;
+    fill(30, 41, 59);
+    noStroke();
+    rect(x, 74, 73, 52, 10);
+    fill(stats[i].color);
+    textAlign(CENTER, TOP);
+    textSize(16);
+    text(stats[i].val, x + 36, 82);
+    fill(100, 116, 139);
+    textSize(8);
+    text(stats[i].label, x + 36, 104);
+  }
+
+  // ── Fee + Compound Detail ──
+  fill(30, 41, 59);
+  noStroke();
+  rect(12, 136, 376, 30, 8);
+  fill(148, 163, 184);
+  textAlign(LEFT, CENTER);
+  textSize(9);
+  text("💰 Fee collected: $89.20  |  🔄 Compounded: 15× today  |  ⛽ Gas: $4.20", 24, 151);
+
+  // ── Chart PnL 30 Hari ──
+  fill(30, 41, 59);
+  noStroke();
+  rect(12, 176, 376, 70, 10);
+  textAlign(LEFT, TOP);
+  fill(148, 163, 184);
+  textSize(10);
+  text("PNL — LAST 30 DAYS", 24, 186);
+  textAlign(RIGHT, TOP);
+  fill(52, 211, 153);
+  text("+14.9%", 372, 186);
+  
+  // Chart line
+  let points = [];
+  for (let i = 0; i < 30; i++) {
+    let x = 28 + i * 11.5;
+    let noiseVal = noise(i * 0.1, 0.5);
+    let y = 216 - noiseVal * 30;
+    points.push({x, y});
+  }
+  
+  stroke(139, 92, 246);
+  strokeWeight(2);
+  noFill();
+  beginShape();
+  for (let p of points) vertex(p.x, p.y);
+  endShape();
+  
+  // Fill below line
+  noStroke();
+  fill(139, 92, 246, 30);
+  beginShape();
+  vertex(points[0].x, 246);
+  for (let p of points) vertex(p.x, p.y);
+  vertex(points[points.length-1].x, 246);
+  endShape(CLOSE);
+
+  // ── Screening Log ──
+  fill(30, 41, 59);
+  noStroke();
+  rect(12, 258, 376, 44, 8);
+  textAlign(LEFT, TOP);
+  fill(148, 163, 184);
+  textSize(10);
+  text("🔍 SCREENING (last cycle)", 24, 268);
+  fill(100, 116, 139);
+  textSize(9);
+  text("✅ 8 pools passed filter  |  ❌ 12 rejected  |  🏆 1 deployed", 24, 286);
+
+  // ── Open Positions ──
+  let py = 316;
+  textAlign(LEFT, TOP);
+  fill(148, 163, 184);
+  textSize(10);
+  text("OPEN POSITIONS (3)", 24, py);
+  
+  let positions = [
+    { name: "BONK / SOL", bins: "40 bins", step: "Step 100", pnl: "+12.3%", pnl_usd: "+$41.50", fee: "$8.20", profit: true },
+    { name: "WIF / SOL", bins: "40 bins", step: "Step 100", pnl: "+5.6%", pnl_usd: "+$18.20", fee: "$5.40", profit: true },
+    { name: "POPCAT / SOL", bins: "45 bins", step: "Step 100", pnl: "-3.2%", pnl_usd: "-$8.40", fee: "$2.10", profit: false },
+  ];
+  
+  for (let i = 0; i < positions.length; i++) {
+    let p = positions[i];
+    let y = py + 22 + i * 54;
+    fill(30, 41, 59);
+    noStroke();
+    rect(12, y, 376, 48, 10);
+    
+    fill(p.profit ? color(52, 211, 153, 40) : color(251, 113, 133, 40));
+    circle(36, y + 24, 28);
+    fill(p.profit ? color(52, 211, 153) : color(251, 113, 133));
+    textAlign(CENTER, CENTER);
+    textSize(12);
+    text(p.profit ? "🟢" : "🔴", 36, y + 24);
+    
+    textAlign(LEFT, TOP);
+    fill(226, 232, 240);
+    textSize(13);
+    text(p.name, 56, y + 6);
+    fill(100, 116, 139);
+    textSize(9);
+    text(p.bins + " | " + p.step, 56, y + 24);
+    text("Fee: " + p.fee, 56, y + 36);
+    
+    textAlign(RIGHT, TOP);
+    fill(p.profit ? color(52, 211, 153) : color(251, 113, 133));
+    textSize(14);
+    text(p.pnl, 372, y + 4);
+    fill(100, 116, 139);
+    textSize(9);
+    text(p.pnl_usd, 372, y + 22);
+    
+    // Range bar
+    fill(51, 65, 85);
+    rect(160, y + 36, 60, 4, 2);
+    fill(p.profit ? color(52, 211, 153) : color(251, 113, 133));
+    rect(160 + (p.profit ? 10 : 30), y + 36, 20, 4, 2);
+  }
+
+  // ── Circuit Breaker Status ──
+  let cy = py + 22 + 3 * 54 + 6;
+  fill(30, 41, 59);
+  noStroke();
+  rect(12, cy, 376, 24, 8);
+  fill(52, 211, 153);
+  textAlign(LEFT, CENTER);
+  textSize(10);
+  text("🛡️ Circuit Breaker: OFF  |  Last loss: 0 streak  |  🔋 Healthy", 24, cy + 12);
+
+  // ── Activity ──
+  let ay = cy + 32;
+  fill(148, 163, 184);
+  textAlign(LEFT, TOP);
+  textSize(10);
+  text("RECENT ACTIVITY", 24, ay);
+  
+  let activities = [
+    { icon: "🚀", text: "Deployed BONK/SOL", time: "10m ago", detail: "1.0 SOL @ bin step 100" },
+    { icon: "🔒", text: "Claimed fees (BONK)", time: "45m ago", detail: "$2.50 claimed" },
+    { icon: "🔄", text: "Compounded → BONK/SOL", time: "2h ago", detail: "$4.20 added to position" },
+    { icon: "❌", text: "RSI exit — closed WIF", time: "3h ago", detail: "RSI 68 → TP +5.6%" },
+    { icon: "🛡️", text: "Security snapshot OK", time: "4h ago", detail: "8 pools screened, 0 threats" },
+    { icon: "📊", text: "Dashboard report sent", time: "5h ago", detail: "Portfolio +$52.30 (24h)" },
+  ];
+  
+  for (let i = 0; i < activities.length; i++) {
+    let a = activities[i];
+    let y = ay + 20 + i * 28;
+    textAlign(LEFT, TOP);
+    textSize(12);
+    text(a.icon, 24, y);
+    fill(226, 232, 240);
+    textSize(12);
+    text(a.text, 48, y);
+    fill(100, 116, 139);
+    textSize(8);
+    text(a.detail, 48, y + 16);
+    textAlign(RIGHT, TOP);
+    fill(71, 85, 105);
+    textSize(9);
+    text(a.time, 372, y);
+    
+    if (i < activities.length - 1) {
+      stroke(30, 41, 59);
+      strokeWeight(1);
+      line(24, y + 24, 376, y + 24);
+    }
+  }
+
+  // ── Bottom Nav ──
+  let navY = 700;
+  stroke(30, 41, 59);
+  strokeWeight(1);
+  line(12, navY, 388, navY);
+  
+  let navItems = [
+    { icon: "📊", label: "Dashboard", active: true },
+    { icon: "💼", label: "Positions", active: false },
+    { icon: "📈", label: "Analytics", active: false },
+    { icon: "🛡️", label: "Security", active: false },
+    { icon: "⚙️", label: "Config", active: false },
+  ];
+  
+  for (let i = 0; i < navItems.length; i++) {
+    let n = navItems[i];
+    let x = 40 + i * 72;
+    noStroke();
+    if (n.active) {
+      fill(6, 182, 212);
+      textSize(18);
+      textAlign(CENTER, TOP);
+      text(n.icon, x, navY + 10);
+      fill(6, 182, 212);
+      textSize(9);
+      text(n.label, x, navY + 34);
+    } else {
+      fill(100, 116, 139);
+      textSize(16);
+      textAlign(CENTER, TOP);
+      text(n.icon, x, navY + 10);
+      textSize(9);
+      text(n.label, x, navY + 34);
+    }
+  }
+
+  // ── Footer ──
+  fill(51, 65, 85);
+  textSize(7);
+  textAlign(CENTER, TOP);
+  text("Muffly v1.0  •  Solana Meteora LP •  Data real-time dari bot", 200, navY + 54);
+}
+
+function drawGradientText(txt, x, y, c1, c2) {
+  let col1 = color(c1), col2 = color(c2);
+  for (let i = 0; i < txt.length; i++) {
+    let c = lerpColor(col1, col2, i / (txt.length - 1));
+    fill(c);
+    text(txt[i], x + i * 12, y);
+  }
+}
+</script>
+</body>
+</html>
